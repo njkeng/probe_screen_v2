@@ -1,0 +1,100 @@
+#!/usr/bin/python
+
+#Thanks to the original code by Jim Womeldorf
+
+#change the following line to alter the title of the message window
+title="Messages"
+
+#If you  would like to change the font size of the message do it here
+fontsize = 20
+
+import sys
+import os
+import ConfigParser
+import Tkinter as tk
+
+MessageFilePath = __file__ + "messages.ini"
+
+proceed = "Y"
+
+if not os.path.isfile(MessageFilePath):
+	instruction = MessageFilePath + "    does not exist"
+	proceed = "N"
+else:
+
+	if len(sys.argv) == 1:
+		instruction = __file__ + " was called with no P value"
+		proceed = "N"
+	else:
+		P=sys.argv[1]
+
+		#The following allows running from a terminal or from Linuxcnc which adds .000000 to the P parameter
+	
+		if len(P)<7:
+			ps=P
+		else:
+			ps=P[0:len(P)-7]
+
+		cfg = ConfigParser.ConfigParser()
+
+		#Present errors raised while reading Messages.ini
+		try:
+			cfg.read(MessageFilePath)	
+			instruction = cfg.get("Messages", ps)
+			instruction = instruction.decode("unicode_escape") 
+		except (ConfigParser.MissingSectionHeaderError), Argument:
+			proceed = "N"
+			instruction = "First line of\n" + MessageFilePath + "\nmust be:\n[Messages]"
+			pass
+		except (ConfigParser.MissingSectionHeaderError, ConfigParser.NoOptionError), Argument:
+			proceed = "N"
+			instruction = "There is no message for number\n" + P + "\n in the file\n" + MessageFilePath
+
+if instruction == "":
+	instruction = "The message for P" + P + " is blank"
+	proceed = "N"
+
+mess = os.linesep + instruction.replace("\n", os.linesep) + os.linesep
+
+window = tk.Tk()
+
+window.title(title)
+window.geometry("1000x2000")
+
+msg = tk.Message(window, text = mess,width=1000)
+msg.config(bg="Yellow", fg="Blue", font=("times", fontsize, "bold"))
+
+#pressing the [Esc] key is the same as clicking Continue
+def close(event):
+	exit(1)
+window.bind("<Escape>",close)
+
+if proceed == "Y":
+
+	#pressing the [Return] key is the same as clicking Continue
+	def go_on(event):
+		exit(0)
+	window.bind("<Return>",go_on)
+	
+	#handles clicking on the Continue button
+	def Continue_clicked():
+		exit(0)
+	
+	btnContinue = tk.Button(window,text="Continue\n[Enter]",command=Continue_clicked,width=60,height=2,font=("Helvetica", "40"))
+	btnContinue.configure(bg = "green")
+
+#handles clicking on the Stop button
+def Stop_clicked():
+	exit(1)
+
+btnStop = tk.Button(window,text="Stop Executing\n[Esc]",command=Stop_clicked,width=60,height=2,font=("Helvetica", "40"))
+btnStop.configure(bg = "red")
+
+msg.pack()
+
+if proceed == "Y":
+	btnContinue.pack()
+
+btnStop.pack()
+
+window.mainloop()

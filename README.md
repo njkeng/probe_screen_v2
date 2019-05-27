@@ -22,6 +22,9 @@
 4. .axisrc is placed in home ~/ folder.
 If you are already using .axisrc, then only add to your file contents of this .axisrc.
 
+5. The contents of the nc_files folder are placed in your nc_files folder.
+Ensure that the file M150 has permissions to execute
+
 
 Use.
 ----------------------------------------------------------------------------------
@@ -43,6 +46,10 @@ More info https://vers.by/en/blog/useful-articles/probe-screen
 Changes in updates.
 ----------------------------------------------------------------------------------
 
+v.2.0.9
+```sh
+-addition of settings to assist with configuration using routers
+```
 v.2.0.8
 ```sh
 -corrections in tool diameter button

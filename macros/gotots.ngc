@@ -4,6 +4,11 @@ G53 G1 Z[#<_ini[AXIS_2]MAX_LIMIT>]
 G53 G1 X[#<_ini[TOOLSENSOR]X>] Y[#<_ini[TOOLSENSOR]Y>]
 G53 G1 Z[#<_ini[TOOLSENSOR]Z>]
 
+;pause if a clip needs to be attached to the tool
+O100 if [#<_ini[TOOLSENSOR]TS_CLIP> GT 0]
+M150 P0
+O100 endif
+
 G91
 F #<_hal[probe.ps_searchvel]>
 G38.2 Z #<_ini[TOOLSENSOR]MAXPROBE>
@@ -12,6 +17,12 @@ F #<_hal[probe.ps_probevel]>
 G4 P0.5
 G38.2 Z[-#<_hal[probe.ps_probe_latch]>*2]
 G1 Z4 F#<_ini[TOOLSENSOR]RAPID_SPEED>
+
+;pause if a clip needs to be removed from the tool
+O200 if [#<_ini[TOOLSENSOR]TS_CLIP> GT 0]
+M150 P1
+O200 endif
+
 G90
 o<gotots> endsub
 M2

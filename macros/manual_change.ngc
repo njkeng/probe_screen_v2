@@ -35,13 +35,18 @@ O200 endif
 G53 G0 X[#<_ini[TOOLSENSOR]X>] Y[#<_ini[TOOLSENSOR]Y>]
 G53 G0 Z[#<_ini[TOOLSENSOR]Z>]
 
-O300 if [#<_hal[probe.ps_searchvel]> LE 0]
-O300 return [-1] ; indicate searchvel <= 0 
+;pause if a clip needs to be attached to the tool
+O300 if [#<_ini[TOOLSENSOR]TS_CLIP> GT 0]
+M150 P0
 O300 endif
 
-O400 if [#<_hal[probe.ps_probevel]> LE 0]
-O400 return [-2] ; indicate probevel <= 0 
+O400 if [#<_hal[probe.ps_searchvel]> LE 0]
+O400 return [-1] ; indicate searchvel <= 0 
 O400 endif
+
+O500 if [#<_hal[probe.ps_probevel]> LE 0]
+O500 return [-2] ; indicate probevel <= 0 
+O500 endif
 
 F #<_hal[probe.ps_searchvel]>
 G91
@@ -51,14 +56,26 @@ G0 Z0.26
 F #<_hal[probe.ps_probevel]>
 G38.2 Z-0.5
 
-O500 if [#5070 EQ 0]
-G90
-O500 return [-3] ; indicate probe contact failure to epilog
-O500 endif
+O600 if [#5070 EQ 0]
+G60
+O600 return [-3] ; indicate probe contact failure to epilog
+O600 endif
 
 G90
 G53 G0 Z[#<_ini[CHANGE_POSITION]Z>]
+
+;pause if a clip needs to be removed from the tool
+O700 if [#<_ini[TOOLSENSOR]TS_CLIP> GT 0]
+M150 P1
+O700 endif
+
 G53 G0 X[#<_ini[CHANGE_POSITION]X>] Y[#<_ini[CHANGE_POSITION]Y>]
+
+;move to the point above the stock 0 position if the fixtures are tall
+O800 if [#<_ini[TOOLSENSOR]TALL_FIXTURES> GT 0]
+G53 G0 Z[#<_ini[AXIS_2]MAX_LIMIT>-0.1]
+G0 X0 Y0
+O800 endif
 
 #<touch_result> = #5063
 #<probeheight> = #<_hal[probe.probeheight]> 
